@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sorting Algorithm Visualizer</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #071121;
+        --panel: rgba(8, 18, 43, 0.96);
+        --panel-soft: rgba(14, 36, 84, 0.9);
+        --text: #edf2ff;
+        --muted: #96a4c8;
+        --accent: #8b5cf6;
+        --accent-strong: #5b21b6;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --line: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      option {
+        background-color: var(--panel);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(139, 92, 246, 0.24),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(34, 197, 94, 0.18),
+            transparent 25%
+          ),
+          linear-gradient(180deg, #0b1220 0%, #08101d 100%);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .page {
+        width: min(1200px, 100%);
+      }
+
+      .hero {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3rem);
+        letter-spacing: -0.03em;
+      }
+
+      .hero p {
+        margin: 12px auto 0;
+        max-width: 700px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .controls {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr 1fr auto;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 12px;
+      }
+
+      .buttons button {
+        flex: 0 1 auto;
+        white-space: nowrap;
+      }
+
+      select {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-size: 1rem;
+      }
+
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .control-panel {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-size: 1rem;
+      }
+
+      input[type="text"]::placeholder {
+        color: rgba(237, 242, 255, 0.45);
+      }
+
+      button {
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        padding: 14px 22px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition:
+          transform 0.2s ease,
+          filter 0.2s ease;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .primary {
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        color: white;
+      }
+
+      .secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+
+      .primary:hover {
+        filter: brightness(1.05);
+      }
+
+      .secondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .hint {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .visualization {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 22px;
+        min-height: 360px;
+      }
+
+      .panel-title {
+        margin: 0 0 18px;
+        font-size: 1.05rem;
+        letter-spacing: 0.01em;
+        color: #e2e8f0;
+      }
+
+      .bar-container {
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        gap: 9px;
+        height: 280px;
+        padding: 16px 8px 40px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
+        );
+        border-radius: 18px;
+        overflow-x: auto;
+        overflow-y: visible;
+      }
+
+      .bar {
+        flex: 1 1 24px;
+        min-width: 24px;
+        border-radius: 16px 16px 4px 4px;
+        position: relative;
+        background: linear-gradient(180deg, #a78bfa, #5b21b6);
+        box-shadow: 0 8px 20px rgba(91, 33, 182, 0.26);
+        transition:
+          transform 0.3s ease,
+          background 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      .bar span {
+        position: absolute;
+        bottom: -26px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--text);
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+
+      .bar .bar-status {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #cbd5e1;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      .bar.compare {
+        background: linear-gradient(180deg, #facc15, #ca8a04);
+        transform: translateY(-8px);
+      }
+
+      .bar.pivot {
+        background: linear-gradient(180deg, #22c55e, #16a34a);
+        transform: translateY(-12px);
+      }
+
+      .bar.swap {
+        background: linear-gradient(180deg, #38bdf8, #0ea5e9);
+        transform: translateY(-12px);
+        box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+        animation: swapShake 0.8s ease-in-out;
+      }
+
+      @keyframes swapShake {
+        0%,
+        100% {
+          transform: translateY(-12px) translateX(0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: translateY(-12px) translateX(-2px);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: translateY(-12px) translateX(2px);
+        }
+      }
+
+      .status-grid {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        align-items: center;
+        font-size: 0.96rem;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .badge.pivot {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+      }
+
+      .badge.compare {
+        background: linear-gradient(135deg, #facc15, #ca8a04);
+      }
+
+      .badge.swap {
+        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      }
+
+      .badge.sorted {
+        background: linear-gradient(135deg, #10b981, #047857);
+      }
+
+      .call-stack {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .call-stack h3 {
+        margin: 0 0 8px;
+        font-size: 0.95rem;
+        color: #cbd5e1;
+      }
+
+      .call-stack div {
+        color: #a5b4fc;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      .bar.dim {
+        opacity: 0.25;
+      }
+
+      .bar.sorted {
+        background: linear-gradient(180deg, #4ade80, #16a34a);
+        box-shadow: 0 8px 28px rgba(22, 163, 74, 0.25);
+      }
+
+      .status-row strong {
+        color: #c7d2fe;
+      }
+
+      .code-block {
+        margin: 0;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.95);
+        color: #cbd5e1;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95rem;
+        overflow: auto;
+        max-height: 520px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .code-line {
+        display: block;
+        padding: 4px 10px;
+        border-radius: 12px;
+      }
+
+      .code-line[data-active="true"] {
+        background: rgba(139, 92, 246, 0.16);
+        color: white;
+      }
+
+      .code-line .line-number {
+        display: inline-block;
+        width: 2.5rem;
+        color: rgba(148, 163, 184, 0.9);
+        user-select: none;
+      }
+
+      .code-line:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .message {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .result-area {
+        margin-top: 24px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .result-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 18px;
+      }
+
+      .result-card h2 {
+        margin: 0 0 10px;
+        font-size: 1rem;
+        color: #e2e8f0;
+      }
+
+      .result-card p {
+        margin: 0;
+        color: #cbd5e1;
+        word-break: break-word;
+      }
+
+      @media (max-width: 900px) {
+        .visualization {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .controls {
+          grid-template-columns: 1fr;
+        }
+
+        .buttons {
+          flex-wrap: wrap;
+          width: 100%;
+        }
+
+        .buttons button {
+          flex: 1 1 calc(50% - 6px);
+        }
+
+        .bar-container {
+          height: 220px;
+          padding: 16px 8px 30px;
+        }
+      }
+    </style>
+    <script src="quicksort.js"></script>
+  </head>
+  <body>
+    <div class="page">
+      <section class="hero">
+        <h1>Sorting Algorithm Visualizer</h1>
+        <p>
+          Select a sorting algorithm and enter a comma-separated array, then
+          watch the algorithm process the data step by step. Each highlighted
+          code line shows the current operation on the array.
+        </p>
+      </section>
+
+      <section class="controls control-panel">
+        <div class="control-group">
+          <label for="algorithmSelect">Sorting Algorithm</label>
+          <select id="algorithmSelect">
+            <option value="quickSort">QuickSort</option>
+            <option value="bubbleSort">Bubble Sort</option>
+            <option value="insertionSort">Insertion Sort</option>
+            <option value="mergeSort">Merge Sort</option>
+            <option value="selectionSort">Selection Sort</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="arrayInput">Array input</label>
+          <input
+            id="arrayInput"
+            type="text"
+            value="3, 5,2, 6 ,1"
+            placeholder="3, 5, 2, 6, 1"
+          />
+        </div>
+        <div class="buttons">
+          <button id="startButton" class="primary" type="button">
+            Visualize
+          </button>
+          <button id="resetButton" class="secondary" type="button">
+            Reset
+          </button>
+        </div>
+        <p class="hint">
+          Valid numbers only. Try duplicates, sorted arrays, or reverse order.
+          The bar labels show pivot, compare, swap, and sorted actions.
+        </p>
+      </section>
+
+      <section class="visualization">
+        <article class="panel">
+          <h2 class="panel-title">Array Visualization</h2>
+          <div id="barContainer" class="bar-container"></div>
+          <div class="legend">
+            <span class="badge pivot">Pivot</span>
+            <span class="badge compare">Comparing</span>
+            <span class="badge swap">Swapping</span>
+            <span class="badge sorted">Sorted</span>
+          </div>
+          <div id="callStack" class="call-stack">
+            <h3>Call stack</h3>
+            <div id="stackList">[]</div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2 id="algorithmTitle" class="panel-title">QuickSort Code</h2>
+          <pre id="codeBlock" class="code-block"></pre>
+          <div id="messageBox" class="message">
+            The highlighted line shows the current execution point. Watch swaps,
+            comparisons, and pivot placement.
+          </div>
+        </article>
+      </section>
+
+      <section class="result-area">
+        <div class="result-card">
+          <h2>Original array</h2>
+          <p id="originalArray">[3, 5, 2, 6, 1]</p>
+        </div>
+        <div class="result-card">
+          <h2>Sorted output</h2>
+          <p id="sortedArray">Awaiting visualization...</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const codeSnippets = {
+        quickSort: [
+          "function quickSort(arr, low = 0, high = arr.length - 1) {",
+          "  if (!Array.isArray(arr)) {",
+          "    throw new TypeError('Input must be an array');",
+          "  }",
+          "",
+          "  if (low < high) {",
+          "    const pivotIndex = partition(arr, low, high);",
+          "    quickSort(arr, low, pivotIndex - 1);",
+          "    quickSort(arr, pivotIndex + 1, high);",
+          "  }",
+          "",
+          "  return arr;",
+          "}",
+          "",
+          "function partition(arr, low, high) {",
+          "  const pivot = arr[high];",
+          "  let i = low - 1;",
+          "",
+          "  for (let j = low; j < high; j++) {",
+          "    if (arr[j] <= pivot) {",
+          "      i++;",
+          "      [arr[i], arr[j]] = [arr[j], arr[i]];",
+          "    }",
+          "  }",
+          "",
+          "  [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];",
+          "  return i + 1;",
+          "}",
+        ],
+        bubbleSort: [
+          "function bubbleSort(arr) {",
+          "  if (!Array.isArray(arr)) {",
+          "    throw new TypeError('Input must be an array');",
+          "  }",
+          "",
+          "  const n = arr.length;",
+          "  for (let i = 0; i < n - 1; i++) {",
+          "    for (let j = 0; j < n - i - 1; j++) {",
+          "      if (arr[j] > arr[j + 1]) {",
+          "        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];",
+          "      }",
+          "    }",
+          "  }",
+          "  return arr;",
+          "}",
+        ],
+        insertionSort: [
+          "function insertionSort(arr) {",
+          "  if (!Array.isArray(arr)) {",
+          "    throw new TypeError('Input must be an array');",
+          "  }",
+          "",
+          "  const n = arr.length;",
+          "  for (let i = 1; i < n; i++) {",
+          "    const key = arr[i];",
+          "    let j = i - 1;",
+          "    while (j >= 0 && arr[j] > key) {",
+          "      arr[j + 1] = arr[j];",
+          "      j--;",
+          "    }",
+          "    arr[j + 1] = key;",
+          "  }",
+          "  return arr;",
+          "}",
+        ],
+        mergeSort: [
+          "function mergeSort(arr) {",
+          "  if (!Array.isArray(arr)) {",
+          "    throw new TypeError('Input must be an array');",
+          "  }",
+          "",
+          "  if (arr.length <= 1) {",
+          "    return arr;",
+          "  }",
+          "",
+          "  const mid = Math.floor(arr.length / 2);",
+          "  const left = mergeSort(arr.slice(0, mid));",
+          "  const right = mergeSort(arr.slice(mid));",
+          "",
+          "  return merge(left, right);",
+          "}",
+          "",
+          "function merge(left, right) {",
+          "  const result = [];",
+          "  let i = 0, j = 0;",
+          "",
+          "  while (i < left.length && j < right.length) {",
+          "    if (left[i] <= right[j]) {",
+          "      result.push(left[i++]);",
+          "    } else {",
+          "      result.push(right[j++]);",
+          "    }",
+          "  }",
+          "",
+          "  return result.concat(left.slice(i)).concat(right.slice(j));",
+          "}",
+        ],
+        selectionSort: [
+          "function selectionSort(arr) {",
+          "  if (!Array.isArray(arr)) {",
+          "    throw new TypeError('Input must be an array');",
+          "  }",
+          "",
+          "  const n = arr.length;",
+          "  for (let i = 0; i < n - 1; i++) {",
+          "    let minIndex = i;",
+          "    for (let j = i + 1; j < n; j++) {",
+          "      if (arr[j] < arr[minIndex]) {",
+          "        minIndex = j;",
+          "      }",
+          "    }",
+          "    if (minIndex !== i) {",
+          "      [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];",
+          "    }",
+          "  }",
+          "  return arr;",
+          "}",
+        ],
+      };
+
+      // Use the shared sorting module loaded by the page script.
+      let sortingModule = window.sortingAlgorithms || null;
+      if (!sortingModule) {
+        console.warn(
+          "Sorting module is not available, using inline fallback trace builder.",
+        );
+      }
+
+      const codeBlock = document.getElementById("codeBlock");
+      const barContainer = document.getElementById("barContainer");
+      const messageBox = document.getElementById("messageBox");
+      const originalArray = document.getElementById("originalArray");
+      const sortedArray = document.getElementById("sortedArray");
+      const stackList = document.getElementById("stackList");
+      const arrayInput = document.getElementById("arrayInput");
+      const algorithmSelect = document.getElementById("algorithmSelect");
+      const algorithmTitle = document.getElementById("algorithmTitle");
+      const startButton = document.getElementById("startButton");
+      const resetButton = document.getElementById("resetButton");
+
+      let currentTimer = null;
+      let currentSteps = [];
+      let currentStepIndex = 0;
+      let currentArray = [];
+
+      function getSelectedAlgorithm() {
+        return algorithmSelect.value;
+      }
+
+      function getAlgorithmDisplayName(algorithm) {
+        const names = {
+          quickSort: "QuickSort",
+          bubbleSort: "Bubble Sort",
+          insertionSort: "Insertion Sort",
+          mergeSort: "Merge Sort",
+          selectionSort: "Selection Sort",
+        };
+        return names[algorithm] || "Unknown Algorithm";
+      }
+
+      function renderCodeLines() {
+        const algorithm = getSelectedAlgorithm();
+        const lines = codeSnippets[algorithm];
+        codeBlock.innerHTML = lines
+          .map((line, index) => {
+            return `<span class="code-line" data-line="${index + 1}"><span class="line-number">${index + 1}</span>${escapeHtml(line)}</span>`;
+          })
+          .join("");
+        algorithmTitle.textContent = `${getAlgorithmDisplayName(algorithm)} Code`;
+        updateStartButtonText();
+      }
+
+      function updateStartButtonText() {
+        startButton.textContent = `Visualize ${getAlgorithmDisplayName(getSelectedAlgorithm())}`;
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function highlightLine(lineNumber) {
+        const lines = codeBlock.querySelectorAll(".code-line");
+        lines.forEach((line) => {
+          line.dataset.active = line.dataset.line === String(lineNumber);
+        });
+      }
+
+      function renderCallStack(stack) {
+        if (!stack || stack.length === 0) {
+          stackList.textContent = "[]";
+          return;
+        }
+
+        const reversed = stack.slice().reverse();
+        stackList.textContent = reversed
+          .map(([low, high], index) => `#${index + 1}: [${low}, ${high}]`)
+          .join("\n");
+      }
+
+      function renderBars(
+        array,
+        activeIndices = [],
+        pivotIndex = null,
+        swapIndices = [],
+        sortedIndices = [],
+        range = null,
+      ) {
+        const max = Math.max(...array, 1);
+        const hasRange =
+          Array.isArray(range) &&
+          typeof range[0] === "number" &&
+          typeof range[1] === "number";
+        barContainer.innerHTML = array
+          .map((value, index) => {
+            const percent = Math.max(10, (value / max) * 100);
+            const classes = ["bar"];
+            const inRange = hasRange
+              ? index >= range[0] && index <= range[1]
+              : true;
+            if (!inRange) classes.push("dim");
+            if (sortedIndices.includes(index)) classes.push("sorted");
+            if (pivotIndex === index) classes.push("pivot");
+            if (swapIndices.includes(index)) classes.push("swap");
+            if (activeIndices.includes(index)) classes.push("compare");
+
+            let status = "";
+            if (pivotIndex === index) {
+              status = "Pivot";
+            } else if (swapIndices.includes(index)) {
+              status = "Swapping";
+            } else if (activeIndices.includes(index)) {
+              status = "Comparing";
+            } else if (sortedIndices.includes(index)) {
+              status = "Sorted";
+            }
+
+            const statusLabel = status
+              ? `<span class="bar-status">${status}</span>`
+              : "";
+
+            return `<div class="${classes.join(" ")}" data-status="${status}" title="${status || "Value"}
+Index: ${index}
+Value: ${value}" style="height:${percent}%"><span>${value}</span>${statusLabel}</div>`;
+          })
+          .join("");
+      }
+
+      function parseInput(value) {
+        return value
+          .split(/[\s,]+/)
+          .filter(Boolean)
+          .map(Number)
+          .filter((num) => !Number.isNaN(num));
+      }
+
+      function createStep({
+        line,
+        message,
+        arr,
+        low,
+        high,
+        pivotIndex,
+        active = [],
+        swap = [],
+        stack = [],
+        sorted = [],
+      }) {
+        return {
+          line,
+          message,
+          arr: arr.slice(),
+          low,
+          high,
+          pivotIndex,
+          active,
+          swap,
+          stack: stack.slice(),
+          sorted: sorted.slice(),
+        };
+      }
+
+      function buildQuickSortTraceInline(numbers) {
+        const arr = numbers.slice();
+        const steps = [];
+        const stack = [];
+        const sorted = [];
+
+        function createStep({
+          line,
+          message,
+          arr,
+          low,
+          high,
+          pivotIndex,
+          active = [],
+          swap = [],
+          stack = [],
+          sorted = [],
+        }) {
+          return {
+            line,
+            message,
+            arr: arr.slice(),
+            low,
+            high,
+            pivotIndex,
+            active,
+            swap,
+            stack: stack.slice(),
+            sorted: sorted.slice(),
+          };
+        }
+
+        function trace(line, data = {}) {
+          steps.push(createStep({ line, arr, stack, sorted, ...data }));
+        }
+
+        function partitionTrace(low, high) {
+          trace(11, {
+            message: `Select pivot at index ${high}`,
+            low,
+            high,
+            pivotIndex: high,
+          });
+          const pivot = arr[high];
+          let i = low - 1;
+
+          for (let j = low; j < high; j++) {
+            trace(14, {
+              message: `Compare arr[${j}] (${arr[j]}) <= pivot (${pivot})`,
+              low,
+              high,
+              pivotIndex: high,
+              active: [j],
+              swap: [],
+            });
+            if (arr[j] <= pivot) {
+              trace(15, {
+                message: `Value is <= pivot, increase i and swap`,
+                low,
+                high,
+                pivotIndex: high,
+                active: [j],
+                swap: [],
+              });
+              i += 1;
+              [arr[i], arr[j]] = [arr[j], arr[i]];
+              trace(16, {
+                message: `Swap arr[${i}] and arr[${j}]`,
+                low,
+                high,
+                pivotIndex: high,
+                active: [i, j],
+                swap: [i, j],
+              });
+            }
+          }
+
+          trace(19, {
+            message: `Swap pivot into correct position at index ${i + 1}`,
+            low,
+            high,
+            pivotIndex: high,
+            active: [i + 1, high],
+            swap: [i + 1, high],
+          });
+          [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+          const pivotPosition = i + 1;
+          sorted.push(pivotPosition);
+          trace(20, {
+            message: `Partition complete: pivot index is ${pivotPosition}`,
+            low,
+            high,
+            pivotIndex: pivotPosition,
+            active: [],
+            swap: [],
+          });
+          return pivotPosition;
+        }
+
+        function quickSortTrace(low, high) {
+          stack.push([low, high]);
+          trace(1, {
+            message: `QuickSort called for range [${low}, ${high}]`,
+            low,
+            high,
+            pivotIndex: null,
+            active: [],
+            swap: [],
+          });
+          if (low < high) {
+            trace(5, {
+              message: `Range has more than one item, partitioning range`,
+              low,
+              high,
+              pivotIndex: null,
+              active: [],
+              swap: [],
+            });
+            const pivotPosition = partitionTrace(low, high);
+            trace(6, {
+              message: `Recursing left side [${low}, ${pivotPosition - 1}]`,
+              low,
+              high,
+              pivotIndex: pivotPosition,
+              active: [],
+              swap: [],
+            });
+            quickSortTrace(low, pivotPosition - 1);
+            trace(7, {
+              message: `Recursing right side [${pivotPosition + 1}, ${high}]`,
+              low,
+              high,
+              pivotIndex: pivotPosition,
+              active: [],
+              swap: [],
+            });
+            quickSortTrace(pivotPosition + 1, high);
+          }
+          trace(9, {
+            message: `Return from QuickSort call`,
+            low,
+            high,
+            pivotIndex: null,
+            active: [],
+            swap: [],
+          });
+          stack.pop();
+        }
+
+        quickSortTrace(0, arr.length - 1);
+        return steps;
+      }
+
+      function buildTrace(numbers) {
+        if (!sortingModule) {
+          // Fallback inline implementations
+          return buildQuickSortTraceInline(numbers);
+        }
+
+        const algorithm = getSelectedAlgorithm();
+        switch (algorithm) {
+          case "quickSort":
+            return sortingModule.buildQuickSortTrace(numbers);
+          case "bubbleSort":
+            return sortingModule.buildBubbleSortTrace(numbers);
+          case "insertionSort":
+            return sortingModule.buildInsertionSortTrace(numbers);
+          case "mergeSort":
+            return sortingModule.buildMergeSortTrace(numbers);
+          case "selectionSort":
+            return sortingModule.buildSelectionSortTrace(numbers);
+          default:
+            return sortingModule.buildQuickSortTrace(numbers);
+        }
+      }
+
+      function playSteps(steps) {
+        if (currentTimer) {
+          clearInterval(currentTimer);
+        }
+
+        currentSteps = steps;
+        currentStepIndex = 0;
+        const totalSteps = steps.length;
+
+        function updateFrame() {
+          if (currentStepIndex >= totalSteps) {
+            clearInterval(currentTimer);
+            const final = steps[steps.length - 1];
+            highlightLine(0);
+            sortedArray.textContent = JSON.stringify(final.arr);
+            renderCallStack(final.stack);
+            renderBars(final.arr, [], null, [], final.sorted);
+            return;
+          }
+
+          const step = steps[currentStepIndex];
+          currentArray = step.arr;
+          renderBars(
+            step.arr,
+            step.active,
+            step.pivotIndex,
+            step.swap,
+            step.sorted,
+            [step.low, step.high],
+          );
+          highlightLine(step.line);
+          messageBox.textContent = `${step.message} (line ${step.line})`;
+          renderCallStack(step.stack);
+
+          currentStepIndex += 1;
+        }
+
+        updateFrame();
+        currentTimer = setInterval(updateFrame, 700);
+      }
+
+      function resetView() {
+        if (currentTimer) {
+          clearInterval(currentTimer);
+          currentTimer = null;
+        }
+        const inputNumbers = parseInput(arrayInput.value);
+        if (inputNumbers.length > 0) {
+          originalArray.textContent = JSON.stringify(inputNumbers);
+        } else {
+          originalArray.textContent = "[ ]";
+        }
+        sortedArray.textContent = "Awaiting visualization...";
+        messageBox.textContent =
+          "The highlighted line shows the current execution point. Watch swaps, comparisons, and pivot placement.";
+        highlightLine(0);
+        renderCallStack([]);
+        renderBars(
+          inputNumbers.length ? inputNumbers : [0],
+          [],
+          null,
+          [],
+          [],
+          null,
+        );
+      }
+
+      renderCodeLines();
+      resetView();
+
+      algorithmSelect.addEventListener("change", () => {
+        renderCodeLines();
+        resetView();
+      });
+
+      startButton.addEventListener("click", () => {
+        const numbers = parseInput(arrayInput.value);
+        if (numbers.length === 0) {
+          stepInfo.textContent = "Enter a valid number array first.";
+          return;
+        }
+
+        const algorithm = getSelectedAlgorithm();
+        originalArray.textContent = JSON.stringify(numbers);
+        sortedArray.textContent = "Sorting...";
+        const trace = buildTrace(numbers);
+        playSteps(trace);
+      });
+
+      resetButton.addEventListener("click", () => {
+        resetView();
+      });
+    </script>
+  </body>
+</html>
